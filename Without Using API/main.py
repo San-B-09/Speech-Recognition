@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.io import wavfile
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
  
 DIR = 'C:/Users/bijaw/Desktop/New folder (3)/trial'
 fns = ['/bed/00f0204f_nohash_0.wav',
@@ -16,7 +16,7 @@ def read_wav_file(x):
         
     return wav
  
-fig = plt.figure(figsize=(14, 8))
+'''fig = plt.figure(figsize=(14, 8))
 for i, fn in enumerate(fns):
     wav = read_wav_file(DIR + fn)
  
@@ -25,7 +25,7 @@ for i, fn in enumerate(fns):
     ax.set_ylabel('Amplitude')
     ax.plot(np.linspace(0, SAMPLE_RATE/len(wav), SAMPLE_RATE), wav)
 fig.tight_layout()
-
+'''
 
 from scipy.signal import stft
  
@@ -37,7 +37,7 @@ def log_spectrogram(wav):
     
     return freqs, times, amp
  
-fig = plt.figure(figsize=(14, 8))
+'''fig = plt.figure(figsize=(14, 8))
 for i, fn in enumerate(fns):
     wav = read_wav_file(DIR + fn)
     freqs, times, amp = log_spectrogram(wav)
@@ -49,9 +49,8 @@ for i, fn in enumerate(fns):
     ax.set_ylabel('Freqs in Hz')
     ax.set_xlabel('Seconds')
 fig.tight_layout()
+'''
 
-
-import numpy as np
 from sklearn.metrics import accuracy_score
 from keras.callbacks import EarlyStopping
  
@@ -72,8 +71,8 @@ dsGen = DatasetGenerator(label_set=LABELS)
 df = dsGen.load_data(DIR)
 
 
-dsGen.apply_train_test_split(test_size=0.2, random_state=2018)
-dsGen.apply_train_val_split(val_size=0.1, random_state=2018)
+dsGen.apply_train_test_split(test_size=0.0, random_state=2018)
+dsGen.apply_train_val_split(val_size=0.01, random_state=2018)
 
 
 from keras.models import Model
@@ -154,20 +153,150 @@ history = model.fit_generator(generator=dsGen.generator(BATCH, mode='train'),
                               validation_data=dsGen.generator(BATCH, mode='val'),
                               validation_steps=int(np.ceil(len(dsGen.df_val)/BATCH)))
 
+#Reading audio from user
+import pyaudio
+import wave
+
+CHUNK = 1024
+FORMAT = pyaudio.paInt16 #paInt8
+CHANNELS = 1
+RATE = 16000 #sample rate
+RECORD_SECONDS = 1
+WAVE_OUTPUT_FILENAME = "C:/Users/bijaw/Desktop/cat/new.wav"
+
+p = pyaudio.PyAudio()
+
+stream = p.open(format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK) #buffer
+
+print("* recording")
+
+frames = []
+#print(int(RATE / CHUNK * RECORD_SECONDS))
+
+for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+    data = stream.read(CHUNK)
+    frames.append(data) # 2 bytes(16 bits) per channel
+
+print("* done recording")
+#print(frames)
+stream.stop_stream()
+stream.close()
+p.terminate()
+
+wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+wf.setnchannels(CHANNELS)
+wf.setsampwidth(p.get_sample_size(FORMAT))
+wf.setframerate(RATE)
+wf.writeframes(b''.join(frames))
+wf.close()
+#end of reading audio
+
+from scipy.io.wavfile import read
+threshold_freq=5500 
+eps=1e-10
+wav = (read(WAVE_OUTPUT_FILENAME))[1]
+
+from pydub import AudioSegment
+from pydub.playback import play 
+audio = AudioSegment.from_wav(WAVE_OUTPUT_FILENAME)
+play(audio)
+# Sample rate
+L = 16000
+print(len(wav))
+# If longer then randomly truncate
+if len(wav) > L:
+    i = np.random.randint(0, len(wav) - L)
+    wav = wav[i:(i+L)]  
+    print(len(wav))
+# If shorter then randomly add silence
+elif len(wav) < L:
+    rem_len = L - len(wav)
+    silence_part = np.random.randint(-100,100,16000).astype(np.float32) / np.iinfo(np.int16).max
+    j = np.random.randint(0, rem_len)
+    silence_part_left  = silence_part[0:j]
+    silence_part_right = silence_part[j:rem_len]
+    print(len(silence_part_left)," ",len(wav)," ",len(silence_part_right))
+    wav = np.concatenate([silence_part_left, wav, silence_part_right])
+# Create spectrogram using discrete FFT (change basis to frequencies)
+freqs, times, spec = stft(wav, L, nperseg = 400, noverlap = 240, nfft = 512, padded = False, boundary = None)
+# Cut high frequencies
+if threshold_freq is not None:
+    spec = spec[freqs <= threshold_freq,:]
+    freqs = freqs[freqs <= threshold_freq]
+import pandas as pd
+e = "cat/new.wav"
+    
+label, name = e.split('/')
+label_id = dsGen.text_to_labels(label)
+fle = "C:/Users/bijaw/Desktop/cat/new.wav"
+
+sample = (label, label_id, name, fle)
+n_df = pd.DataFrame(data = [sample],columns = ['label', 'label_id', 'user_id', 'wav_file'])
+dsGen.df_test = dsGen.df_test.append(n_df)
+df_new = dsGen.df_test
+print("____DONE____")
+
+'''
+from pydub import AudioSegment
+from pydub.playback import play
+
+audio = AudioSegment.from_wav(WAVE_OUTPUT_FILENAME)
+play(audio)
+'''
+
+from keras.utils import to_categorical
+import random
 
 
+"""def generator(batch_size, mode):
+        #print(type(self)) -> class daatset generator
+        while True:
+            # Depending on mode select DataFrame with paths
+            if mode == 'train':
+                df = dsGen.df_train 
+                ids = random.sample(range(df.shape[0]), df.shape[0])
+            elif mode == 'val':
+                df = dsGen.df_val
+                ids = list(range(df.shape[0]))
+            elif mode == 'test':
+                df = dsGen.df_test
+                ids = list(range(df.shape[0]))
+                #print(ids)
+            else:
+                raise ValueError('The mode should be either train, val or test.')
+                
+            # Create batches (for training data the batches are randomly permuted)
+            for start in range(0, len(ids), batch_size):
+                X_batch = []
+                if mode != 'test': 
+                    y_batch = []
+                end = min(start + batch_size, len(ids))
+                i_batch = ids[start:end]
+                for i in i_batch:
+                    X_batch.append(df.wav_file.values[i])
+                    if mode != 'test':
+                        y_batch.append(df.label_id.values[i])
+                X_batch = np.array(X_batch)
+
+                if mode != 'test':
+                    y_batch = to_categorical(y_batch, num_classes = len(dsGen.label_set))
+                    yield (X_batch, y_batch)
+                else:
+                    yield X_batch
+    """
+    
 y_pred_proba = model.predict_generator(dsGen.generator(BATCH, mode='test'), 
                                      int(np.ceil(len(dsGen.df_test)/BATCH)), 
                                      verbose=1)
+
 y_pred = np.argmax(y_pred_proba, axis=1)
  
 y_true = dsGen.df_test['label_id'].values
-
-lable = []
-for i in y_pred:
-    lable.append(dsGen.labels_to_text(i))
-
-acc_score = accuracy_score(y_true, y_pred)
-print(acc_score)
+ 
+print(dsGen.labels_to_text(y_pred[0]))
 
 
