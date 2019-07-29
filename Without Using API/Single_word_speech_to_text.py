@@ -16,7 +16,7 @@ def read_wav_file(x):
         
     return wav
  
-'''fig = plt.figure(figsize=(14, 8))
+fig = plt.figure(figsize=(14, 8))
 for i, fn in enumerate(fns):
     wav = read_wav_file(DIR + fn)
  
@@ -25,7 +25,7 @@ for i, fn in enumerate(fns):
     ax.set_ylabel('Amplitude')
     ax.plot(np.linspace(0, SAMPLE_RATE/len(wav), SAMPLE_RATE), wav)
 fig.tight_layout()
-'''
+
 
 from scipy.signal import stft
  
@@ -37,7 +37,7 @@ def log_spectrogram(wav):
     
     return freqs, times, amp
  
-'''fig = plt.figure(figsize=(14, 8))
+fig = plt.figure(figsize=(14, 8))
 for i, fn in enumerate(fns):
     wav = read_wav_file(DIR + fn)
     freqs, times, amp = log_spectrogram(wav)
@@ -49,7 +49,7 @@ for i, fn in enumerate(fns):
     ax.set_ylabel('Freqs in Hz')
     ax.set_xlabel('Seconds')
 fig.tight_layout()
-'''
+
 
 from sklearn.metrics import accuracy_score
 from keras.callbacks import EarlyStopping
@@ -250,44 +250,6 @@ play(audio)
 
 from keras.utils import to_categorical
 import random
-
-
-"""def generator(batch_size, mode):
-        #print(type(self)) -> class daatset generator
-        while True:
-            # Depending on mode select DataFrame with paths
-            if mode == 'train':
-                df = dsGen.df_train 
-                ids = random.sample(range(df.shape[0]), df.shape[0])
-            elif mode == 'val':
-                df = dsGen.df_val
-                ids = list(range(df.shape[0]))
-            elif mode == 'test':
-                df = dsGen.df_test
-                ids = list(range(df.shape[0]))
-                #print(ids)
-            else:
-                raise ValueError('The mode should be either train, val or test.')
-                
-            # Create batches (for training data the batches are randomly permuted)
-            for start in range(0, len(ids), batch_size):
-                X_batch = []
-                if mode != 'test': 
-                    y_batch = []
-                end = min(start + batch_size, len(ids))
-                i_batch = ids[start:end]
-                for i in i_batch:
-                    X_batch.append(df.wav_file.values[i])
-                    if mode != 'test':
-                        y_batch.append(df.label_id.values[i])
-                X_batch = np.array(X_batch)
-
-                if mode != 'test':
-                    y_batch = to_categorical(y_batch, num_classes = len(dsGen.label_set))
-                    yield (X_batch, y_batch)
-                else:
-                    yield X_batch
-    """
     
 y_pred_proba = model.predict_generator(dsGen.generator(BATCH, mode='test'), 
                                      int(np.ceil(len(dsGen.df_test)/BATCH)), 
