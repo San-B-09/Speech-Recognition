@@ -86,9 +86,7 @@ Data is visualised in the form of signal wave and spectrogram.
 Initialisation of labels, loading dataset into dataframe and splitting it into train, test and validation dataframe.
 
 
-*	**CNN Model**:
-Convolutional neural network is used to find patterns. We do that by convoluting over an audio and looking for patterns. In the first few layers of CNNs the network can identify length decibels and frequency, but we can then pass these patterns down through our neural net and start recognizing more complex features as we get deeper. This property makes CNN’s good at recognising speech.
-
+*	**CNN Model**: Convolutional neural network is used to find patterns. We do that by convoluting over an audio and looking for patterns. In the first few layers of CNNs the network can identify length decibels and frequency, but we can then pass these patterns down through our neural net and start recognizing more complex features as we get deeper. This property makes CNN’s good at recognising speech.
   1. Pooling layer: It partitions the input audio into a set of non-overlapping chunks and, for each such sub-region, outputs a value. The intuition is that the exact location of a feature is less important than its rough location relative to other features. Max - Pooling outputs the maximum value of the sub-region.
   2. Batch Normalisation: We normalize the input layer by adjusting and scaling the activations. We should normalize them to speed up learning. Batch normalization reduces the amount by what the hidden unit values shift around (covariance shift).
   3. Convolutional 2D: It extracts features from a source audio and works on chunks depending on kernel size. Layers early in the network architecture learn fewer convolutional filters while layers deeper in the network will learn more filters.
@@ -112,17 +110,20 @@ Audio file containing more than one word is split into chunks of single word aud
 It predicts labels on basis of recorded audio file. Accuracy score is 91.20556% for single word prediction
 
 
-RESULTS
+#### RESULTS
+Image of accuracy score on test dataset:
+![Image of Accuracy Score](https://github.com/San-B-09/Speech-to-Text/blob/master/Without%20Using%20API/Accuracy%20Score.jpeg)
+
+Image of output text from recorded audio:
+![Image of output text](https://github.com/San-B-09/Speech-to-Text/blob/master/Without%20Using%20API/Recorded%20audio%20to%20text%20output%20format.jpeg)
 
 
-
-
-REFERENCES
-i.	https://keras.io/
-ii.	https://pypi.org/project/PyAudio/
-iii.	https://pypi.org/project/pydub/
-iv.	http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
-v.	https://medium.com/@RaghavPrabhu/understanding-of-convolutional-neural-network-cnn-deep-learning-99760835f148
-vi.	https://www.youtube.com/watch?v=RBgfLvAOrss
-vii.	https://www.youtube.com/watch?v=WCUNPb-5EYI&t=1188s
+#### REFERENCES
+1.	https://keras.io/
+2.	https://pypi.org/project/PyAudio/
+3.	https://pypi.org/project/pydub/
+4.	http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
+5.	https://medium.com/@RaghavPrabhu/understanding-of-convolutional-neural-network-cnn-deep-learning-99760835f148
+6.	https://www.youtube.com/watch?v=RBgfLvAOrss
+7.	https://www.youtube.com/watch?v=WCUNPb-5EYI&t=1188s
 
